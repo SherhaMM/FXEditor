@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollBar?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ap161.mihailov.Control">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="New" />
+                  <MenuItem mnemonicParsing="false" onAction="#mnuOpenAction" text="Open " />
+                  <MenuItem mnemonicParsing="false" onAction="#mnuSaveAction" text="Save" />
+                  <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Convert" />
+                  <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+            <Menu mnemonicParsing="false" text="View">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#addTab" text="Add Tab" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Filter">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Gaus Blur" />
+              </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#showHelp" text="About " />
+              </items>
+            </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <left>
+      <ButtonBar prefHeight="561.0" prefWidth="113.0" BorderPane.alignment="CENTER">
+         <buttons>
+            <SplitPane prefHeight="542.0" prefWidth="117.0">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="569.0" prefWidth="107.0">
+                     <children>
+                        <GridPane layoutX="1.0" layoutY="4.0" prefHeight="159.0" prefWidth="100.0" AnchorPane.topAnchor="4.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints minHeight="10.0" prefHeight="40.0" valignment="CENTER" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="44.92119598388672" minHeight="10.0" prefHeight="40.0" valignment="CENTER" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="40.19701385498047" minHeight="10.0" prefHeight="40.0" valignment="CENTER" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="33.24552917480469" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Button fx:id="btn1" mnemonicParsing="false" onAction="#mnuBrightscale" prefHeight="26.0" prefWidth="40.0" text="bright">
+                                 <GridPane.margin>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </GridPane.margin>
+                                 <font>
+                                    <Font name="Comic Sans MS Bold" size="9.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btn2" mnemonicParsing="false" onAction="#mnuDarkscale" prefHeight="26.0" prefWidth="40.0" text="dark" GridPane.columnIndex="1">
+                                 <GridPane.margin>
+                                    <Insets bottom="2.0" left="6.0" right="2.0" top="2.0" />
+                                 </GridPane.margin>
+                                 <font>
+                                    <Font name="Comic Sans MS" size="9.0" />
+                                 </font>
+                              </Button>
+                              <Button fx:id="btn3" mnemonicParsing="false" onAction="#mnuGrayscale" prefHeight="26.0" prefWidth="40.0" text="b/w" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </GridPane.margin>
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Button>
+                              <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                 <GridPane.margin>
+                                    <Insets bottom="2.0" left="6.0" right="2.0" top="2.0" />
+                                 </GridPane.margin>
+                              </Button>
+                              <Button fx:id="btn2" mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </GridPane.margin>
+                              </Button>
+                              <Button mnemonicParsing="false" prefHeight="26.0" prefWidth="40.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                 <GridPane.margin>
+                                    <Insets bottom="2.0" left="6.0" right="2.0" top="2.0" />
+                                 </GridPane.margin>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding>
+                        </GridPane>
+                     </children>
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                  </AnchorPane>
+              </items>
+            </SplitPane>
+         </buttons>
+      </ButtonBar>
+   </left>
+   <center>
+      <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab closable="false" text="Main">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <ImageView fx:id="imgView" fitHeight="639.0" fitWidth="807.0" layoutX="2.0" layoutY="2.0" pickOnBounds="true" preserveRatio="true" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+   <right>
+      <ScrollBar orientation="VERTICAL" prefHeight="530.0" prefWidth="19.0" BorderPane.alignment="CENTER" />
+   </right>
+</BorderPane>
