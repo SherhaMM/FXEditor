@@ -24,7 +24,6 @@ public class Main extends Application {
         stage.setTitle("FX Editor");
         stage.setScene(scene);
         stage.show();
-       ImageControl.getInstance().setMainStage(stage);
     }
 
     public static void main(String[] args)  {

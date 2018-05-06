@@ -1,41 +1,26 @@
 package ap161.mihailov;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
-import java.util.function.UnaryOperator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 public class ImageControl {
-    private Stage MainStage;
-    private Image img;
     private ImageView imgView;
     private static ImageControl state;
-    private TabPane tabPane;
+    private Tab tabOnFocus;
+    private Map tabImgViews= new HashMap<Tab,ImageView>();
 
-    public TabPane getTabPane() {
-        return tabPane;
+    public Tab getTabOnFocus() {
+        return tabOnFocus;
     }
 
-    public void setTabPane(TabPane tabPane) {
-        this.tabPane = tabPane;
-    }
-
-    public Stage getMainStage() {
-        return MainStage;
-    }
-
-    public void setMainStage(Stage mainStage) {
-        MainStage = mainStage;
-    }
-
-    public Image getImg() {
-        return img;
+    public void setTabOnFocus(Tab tabOnFocus) {
+        this.tabOnFocus = tabOnFocus;
     }
 
     public static ImageControl getInstance(){
@@ -44,26 +29,29 @@ public class ImageControl {
         }
         return state;
     }
-    public void setImg(Image img) {
-        this.img = img;
+    public Image getImg() {
+        return  getImgView().getImage();
     }
 
-    public ImageView getImgView() {
-        return imgView;
+    public void setImg(Image img) {
+        ImageView view= getImgView();
+        view.setImage(img);
+
     }
 
     public void setImgView(ImageView imgView) {
-        this.imgView = imgView;
+        tabImgViews.put(tabOnFocus,imgView);
+    }
+    public ImageView getImgView() {
+
+        return (ImageView)tabImgViews.get(tabOnFocus);
+
     }
 
-    public void setImgViewRefresh(Image img){
+    public void setImgToView(Image img){
         System.out.println(img);
-        this.imgView.setImage(img);
-        this.img=img; //added
+        this.imgView.setImage(img); //added view
+      //  list.add(img);
+        System.out.println("Image Control - img добавлен в view");
     }
-
-
-
-
-
 }
