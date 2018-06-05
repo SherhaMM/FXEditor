@@ -10,6 +10,7 @@ interface ColorTransformer {
 }
 
 public class Transform {
+
     public static Image transform(Image in, ColorTransformer f) {
         int width = (int) in.getWidth();
         int height = (int) in.getHeight();
@@ -30,4 +31,6 @@ public class Transform {
                 out.getPixelWriter().setColor(x, y, f.apply(in.getPixelReader().getColor(x, y)));
         return out;
     }
+
+
 }
