@@ -1,35 +1,39 @@
 package ap161.mihailov;
+
+import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.Lighting;
+import javafx.scene.effect.SepiaTone;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
 import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Shape;
+import javafx.scene.shape.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
-import javax.swing.*;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -39,12 +43,7 @@ import java.util.ResourceBundle;
 
 public class Control implements Initializable {
 
-    @FXML
-    private ImageView imgView;
-    @FXML
-    private TabPane tabPane;
-    @FXML
-    Button btn1,btn2,btn3;
+
     @FXML
     Tab mainTab;
     @FXML
@@ -57,40 +56,111 @@ public class Control implements Initializable {
     Slider brushSize;
     @FXML
     ScrollPane scrollPane;
-    private Color mColor = Color.BLACK;
-    private double xPos, yPos, hPos, wPos;
     @FXML
     ToggleGroup drwToggle;
-    private double penSize=20;
-    int tabNumber=0;
+    private ArrayList<Shape> removeShapes = new ArrayList<>(1000);
+
+    public enum Pen {
+        CIR, SQR, LINE, DROP, REC ,ELLPS
+    }
+    @FXML
+    private ImageView imgView;
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private ToggleButton drwCircle, drwPixel, drwDrop, drwLine,drwRec,drwEllipse;
+    private Color mColor = Color.BLACK;
+    private double xPos, yPos, hPos, wPos,xScroll,yScroll;
+    private double penSize = 5;
+    private Pen penStyle = Pen.CIR;
+
 
     @FXML
-    void createFile(ActionEvent event){
-        Tab focused= ImageControl.getInstance().getTabOnFocus();
-        ScrollPane sc=new ScrollPane();
-        ImageView im=new ImageView();
+    private void createFile(ActionEvent event) {
+        Tab focused = ImageControl.getInstance().getTabOnFocus();
+        ImageView im = new ImageView();
+        ScrollPane sc = new ScrollPane();
+        AnchorPane an = new AnchorPane();
+//        im.setFitWidth(800);
+//        im.setFitHeight(600);
         sc.setContent(im);
-        focused.setContent(sc);
-        this.imgView=im;
+        sc.setPrefWidth(800);
+        sc.setPrefHeight(600);
+        an.setRightAnchor(sc,0.);
+        an.setBottomAnchor(sc,0.);
+        an.setTopAnchor(sc,0.);
+        an.setLeftAnchor(sc,0.);
+        an.getChildren().add(sc);
+        focused.setContent(an);
+        ImageControl.getInstance().setAncPane(an);
         ImageControl.getInstance().setImgView(im);
+        ImageControl.getInstance().setScrollPane(sc);
+        addListener(event);
     }
 
+
     @FXML
-    void addTab(ActionEvent event){
+    public void addTab(ActionEvent event) {
         Tab tab = new Tab();
-        ScrollPane sc=new ScrollPane();
-        ImageView im=new ImageView();
-        sc.setContent(im);
+        createFile(event);
         tab.setText("Unnamed tab");
-        tab.setContent(sc);
+//        AnchorPane an= new AnchorPane();
+//        ScrollPane sc=new ScrollPane();
+//        ImageView im=new ImageView();
+//
+//        sc.setContent(im);
+//        an.getChildren().add(sc);
+
+//        tab.setContent(sc);
+
         this.tabPane.getTabs().add(tab);
         this.tabPane.getSelectionModel().select(tab);
-        tabNumber++;
-        this.imgView=im;
-        ImageControl.getInstance().setImgView(im);
+//        ImageControl.getInstance().setImgView(im);
+//        ImageControl.getInstance().setAncPane(an);
     }
     @FXML
-    void mnuOpenAction(ActionEvent event) {
+    public void renameTab(){
+        Tab currentTab = ImageControl.getInstance().getTabOnFocus();
+
+        String string= new String();
+        final Stage stage = new Stage();
+        Group rootGroup = new Group();
+        Scene scene = new Scene(rootGroup, 188, 80, Color.WHITESMOKE);
+        stage.setScene(scene);
+        stage.setTitle("Rename Tab");
+        stage.centerOnScreen();
+        stage.show();
+        TextField datafield = new TextField();
+        Button btn = new Button("Enter");
+        btn.setOnAction(event -> stage.close());
+        datafield.setPromptText("Enter tab name");
+        datafield.setMaxHeight(TextField.USE_PREF_SIZE);
+        datafield.setMaxWidth(TextField.USE_PREF_SIZE);
+        VBox vBox= new VBox(7);
+        vBox.setPadding(new Insets(12));
+        vBox.getChildren().addAll(datafield,btn);
+        vBox.setAlignment(Pos.CENTER);
+        rootGroup.getChildren().add(vBox);
+        currentTab.textProperty().bind(datafield.textProperty());
+    }
+
+//    @FXML
+//    public void undo(){
+//        if(!removeShapes.isEmpty()) {
+//            AnchorPane an= ImageControl.getInstance().getAncPane();
+//            Shape shape=removeShapes.get(removeShapes.size()-1);
+//            an.getChildren().remove(shape);
+//            shape=null;
+//
+//            for (int i=0;0<removeShapes.size()-1;i++) {
+//                System.out.println(removeShapes.get(i));
+//
+//            }
+//        }
+//    }
+
+    @FXML
+    private  void mnuOpenAction(ActionEvent event) {
         ImageControl.getInstance().setImgView(this.imgView);
         FileChooser fileChooser = new FileChooser();
 
@@ -103,18 +173,17 @@ public class Control implements Initializable {
         try {
             BufferedImage bufferedImage = ImageIO.read(file);
             createFile(new ActionEvent());
+            //   ImageControl.getInstance().setImgView(this.imgView);
             ImageControl.getInstance().setImg(SwingFXUtils.toFXImage(bufferedImage, null));
-//            imgView.setImage(SwingFXUtils.toFXImage(bufferedImage, null));
-            ImageControl.getInstance().setImgView(this.imgView);
-            ImageControl.getInstance().setImg(SwingFXUtils.toFXImage(bufferedImage, null));
-//        ImageControl.getInstance().setImgToView(ImageControl.getInstance().getImg());
+            addListener(event);
         } catch (IOException ex) {
-        //   ex.printStackTrace();
+            System.err.println(ex.getCause());
         }
 
     }
+
     @FXML
-    void mnuSaveAction(ActionEvent event){
+    private void mnuSaveAction(ActionEvent event) {
 
 
         FileChooser fileChooser = new FileChooser();
@@ -127,9 +196,7 @@ public class Control implements Initializable {
 
         if (file != null) {
             try {
-                ImageIO.write(SwingFXUtils.fromFXImage(ImageControl.getInstance().getImg(),null),"png",file);
-//                ImageIO.write(SwingFXUtils.fromFXImage(ImageControl.getInstance().getImgView().getImage(),
-//                        null), "png", file);
+                ImageIO.write(SwingFXUtils.fromFXImage(ImageControl.getInstance().getImg(), null), "png", file);
             } catch (IOException ex) {
                 System.out.println(ex.getMessage());
             }
@@ -137,176 +204,301 @@ public class Control implements Initializable {
     }
 
     @FXML
-    private void zoomIn(){
-        //TODO
-        Image n;
-        double height,width;
-        n=this.imgView.getImage();
-        height=n.getHeight();
-        width=n.getWidth();
-        System.out.println(height+"- высота, "+width+"- ширина");
-    }
-    @FXML
-    private void zoomOut(){
-    // TODO: 06.05.18
+    private void zoomIn() {
+        ImageView im = ImageControl.getInstance().getImgView();
+        double valueX = im.getScaleX();
+        double valueY = im.getScaleY();
+        im.setScaleX(valueX + 0.15);
+        im.setScaleY(valueY + 0.15);
+
+
+
     }
 
     @FXML
-    void mnuGrayscale(ActionEvent event) {
+    private void zoomOut() {
+        ImageView im = ImageControl.getInstance().getImgView();
+        double valueX = im.getScaleX();
+        double valueY = im.getScaleY();
+        im.setScaleX(valueX - 0.15);
+        im.setScaleY(valueY - 0.15);
 
+
+    }
+
+    @FXML
+    private void mnuGrayscale(ActionEvent event) {
         if (ImageControl.getInstance().getImg() == null)
             return;
-//         ImageControl.getInstance().setImgView(this.imgView);
         Image greyImage = Transform.transform(ImageControl.getInstance().getImg(), Color::grayscale);
-//        this.imgView.setImage(greyImage);
         ImageControl.getInstance().setImg(greyImage);
 
 
     }
+
     @FXML
-    void mnuBrightscale(ActionEvent event) {
+    private void mnuBrightscale(ActionEvent event) {
         if (ImageControl.getInstance().getImg() == null)
             return;
-
-//        ImageControl.getInstance().setImgView(this.imgView);
         Image brightImage = Transform.transform(ImageControl.getInstance().getImg(), Color::brighter);
-//        this.imgView.setImage(brightImage);
         ImageControl.getInstance().setImg(brightImage);
 
 
     }
+
     @FXML
-    void mnuDarkscale(ActionEvent event) {
+    private void mnuDarkscale(ActionEvent event) {
         if (ImageControl.getInstance().getImg() == null)
             return;
-//        ImageControl.getInstance().setImgView(this.imgView);
         Image brightImage = Transform.transform(ImageControl.getInstance().getImg(), Color::darker);
-//        this.imgView.setImage(brightImage);
         ImageControl.getInstance().setImg(brightImage);
 
 
     }
 
     @FXML
-    private ToggleButton drwCircle,drwPixel;
-    ArrayList<Shape> removeShapes = new ArrayList<>(1000);
+    private void mnuBlur(ActionEvent event) {
 
+        if (ImageControl.getInstance().getImg() == null)
+            return;
+        BoxBlur bb = new BoxBlur();
+        bb.setHeight(5);
+        bb.setWidth(5);
+        bb.setIterations(3);
+        ImageView im = ImageControl.getInstance().getImgView();
+        im.setEffect(bb);
+        ImageControl.getInstance().setImgView(im);
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("initialize set img");
-        ImageControl.getInstance().setTabOnFocus(mainTab);
-        ImageControl.getInstance().setImgView(this.imgView);
-        drwCircle.setToggleGroup(drwToggle);//TODO
-        drwPixel.setToggleGroup(drwToggle);
+    }
+    @FXML
+    private void mnuSepia(ActionEvent event) {
+        if (ImageControl.getInstance().getImg() == null)
+            return;
+        SepiaTone sepiaTone = new SepiaTone(.7);
+        ImageControl.getInstance().getImgView().setEffect(sepiaTone);
+    }
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+    @FXML
+    private void addListener(ActionEvent event) {
+
+        ImageView im = ImageControl.getInstance().getImgView();
+        AnchorPane currentAnc = ImageControl.getInstance().getAncPane();
+        ScrollPane currentScroll = ImageControl.getInstance().getScrollPane();
+        currentScroll.vvalueProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-            ImageControl.getInstance().setTabOnFocus(newValue);
-            System.out.println("Tab Listner выбрана вкладка - " + newValue);
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 
+                yScroll=((double)newValue/4)*im.getBoundsInLocal().getHeight();
+//                System.out.println("Vertical slider= "+ yScroll);
+                for (Shape s:removeShapes) {
+                    s.setLayoutY(-yScroll);
+                }
             }
         });
 
-                clrPick.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        mColor = clrPick.getValue();
-                    }
-                });
-
-        brushSize.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        currentScroll.hvalueProperty().addListener(new ChangeListener<Number>() {
             @Override
-            public void handle(MouseEvent event) {
-                penSize = brushSize.getValue();
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+
+                xScroll=((double)newValue/4)*im.getBoundsInLocal().getWidth();
+//                System.out.println("Horizontal slider= "+ xScroll);
+                for (Shape s:removeShapes) {
+                    s.setLayoutX(-xScroll);
+                }
             }
         });
-//        imgView.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, new EventHandler<javafx.scene.input.MouseEvent>() {
-//            @Override
-//            public void handle(javafx.scene.input.MouseEvent event) {
+
+        im.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, event1 -> {
+
+            xPos = (int) event1.getX();
+            yPos = (int) event1.getY();
+            event1.consume();
+        });
+
+        im.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_RELEASED, event12 -> {
+            hPos = event12.getX();
+            wPos = event12.getY();
+
+            if (penStyle == Pen.REC) {
+
+                Rectangle rec = new Rectangle(xPos, yPos, hPos - xPos, wPos - yPos);
+                rec.setStroke(mColor);
+                rec.setStrokeWidth(brushSize.getValue());
+                rec.setFill(null);
+                currentAnc.getChildren().add(rec);
+                removeShapes.add(rec);
+            }
+            if (penStyle == Pen.ELLPS) {
+
+                Ellipse ell = new Ellipse(xPos, yPos, hPos - xPos, wPos - yPos);
+                ell.setStroke(mColor);
+                ell.setStrokeWidth(brushSize.getValue());
+                ell.setFill(null);
+                currentAnc.getChildren().add(ell);
+                removeShapes.add(ell);
+            }
+            if (penStyle == Pen.LINE) {
+
+                Line line = new Line(xPos, yPos, hPos, wPos);
+                line.setStroke(mColor);
+                line.setFill(mColor);
+                line.setStrokeWidth(brushSize.getValue());
+                currentAnc.getChildren().add(line);
+                removeShapes.add(line);
+            }
+//            if (penStyle == Pen.CIR || penStyle == Pen.SQR || penStyle == Pen.LINE) {
+//                Image image = ImageControl.getInstance().getImg();
+//                WritableImage wi;
+//                SnapshotParameters parameters = new SnapshotParameters();
+//                wi = new WritableImage((int) image.getWidth(), (int) image.getHeight());
 //
-//                xPos= (int) event.getX();
-//                yPos= (int) event.getY();
-//                event.consume();
-//            }
-//        });
-//        imgView.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_RELEASED, new EventHandler<javafx.scene.input.MouseEvent>() {
-//            @Override
-//            public void handle(javafx.scene.input.MouseEvent event) {
-//                System.out.println("Mouse released"+event.getSource());
-//                SnapshotParameters snapshotParameters= new SnapshotParameters();
-//                snapshotParameters.setViewport(new Rectangle2D(0,0,imgView.getFitWidth(),imgView.getFitHeight()));
-//                Image snapshot= ancRoot.snapshot(snapshotParameters, null);
-//                ImageControl.getInstance().setImgToView(snapshot);
-//                ancRoot.getChildren().removeAll(removeShapes);
+//                currentAnc.snapshot(parameters, wi);
+//                ImageControl.getInstance().setImg(wi);
+//                currentAnc.getChildren().removeAll(removeShapes);
 //                removeShapes.clear();
 //
+//
 //            }
-//        });
+        });
+
+        im.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_DRAGGED, me -> {
 
 
-        imgView.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_DRAGGED, new EventHandler<javafx.scene.input.MouseEvent>() {
-            @Override
-            public void handle(javafx.scene.input.MouseEvent me) {
-
-                if(drwCircle.isSelected()) {
+                if (penStyle == Pen.CIR) {
                     xPos = me.getX();
                     yPos = me.getY();
+                    int nShape = 0;
 
-//                    int nShape = 0;
-//                DrawShapes.getInstance().drawShape(imgView,ancRoot,xPos,yPos,penSize,mColor);
                     Shape shape = new Circle(xPos, yPos, 10);
                     shape = new Circle(xPos, yPos, penSize);
-
                     // shape.setStroke(mColor);
                     shape.setFill(mColor);
-
-                     ancRoot.getChildren().add(shape);
-//                    removeShapes.add(shape);
+                    currentAnc.getChildren().add(shape);
+                    removeShapes.add(shape);
                     me.consume();
                 }
-                if(drwPixel.isSelected()){
-
+                if (penStyle == Pen.SQR) {
                     xPos = me.getX();
                     yPos = me.getY();
-
                     Shape shape = new Circle(xPos, yPos, 10);
                     shape = new Circle(xPos, yPos, 2);
 
                     // shape.setStroke(mColor);
                     shape.setFill(mColor);
 
-                    ancRoot.getChildren().add(shape);
-
-//                    removeShapes.add(shape);
+                    currentAnc.getChildren().add(shape);
+                    removeShapes.add(shape);
                     me.consume();
                 }
-            }
+                if (penStyle == Pen.DROP) {
+                    xPos = me.getX();
+                    yPos = me.getY();
+                    Color pixelColor;
+                    PixelReader pixelReader = ImageControl.getInstance().getImg().getPixelReader();
+                    pixelColor = pixelReader.getColor(((int) xPos), ((int) yPos));
+                    System.out.println(pixelColor);
+                    clrPick.setValue(pixelColor);
+                    mColor = clrPick.getValue();
+                }
 
         });
 
     }
 
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        ImageControl.getInstance().setTabOnFocus(mainTab);
+        ImageControl.getInstance().setImgView(this.imgView);
+        brushSize.setValue(5);
+
+        drwToggle.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == drwCircle) {
+                penStyle = Pen.CIR;
+                System.out.println("Initialize: resources = " + resources);
+            } else if (newValue == drwPixel) {
+                penStyle = Pen.SQR;
+            } else if (newValue == drwDrop) {
+                penStyle = Pen.DROP;
+            } else if (newValue == drwLine) {
+                penStyle = Pen.LINE;
+            } else if (newValue == drwRec) {
+                penStyle = Pen.REC;
+            } else if (newValue == drwEllipse) {
+                penStyle = Pen.ELLPS;
+            }
+        });
+        tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            ImageControl.getInstance().setTabOnFocus(newValue);
+        });
+
+        clrPick.setOnAction(event -> mColor = clrPick.getValue());
+        brushSize.setOnMouseClicked(event -> penSize = brushSize.getValue());
+
+       /* ImageControl.getInstance().getImgView().addEventFilter(javafx.scene.input.MouseEvent.MOUSE_DRAGGED, me -> {
+
+            if (penStyle == Pen.CIR) {
+                xPos = me.getX();
+                yPos = me.getY();
+
+                int nShape = 0;
+//                DrawShapes.getInstance().drawShape(imgView,ancRoot,xPos,yPos,penSize,mColor);
+                Shape shape = new Circle(xPos, yPos, 10);
+                shape = new Circle(xPos, yPos, penSize);
+
+//                     shape.setStroke(mColor);
+                shape.setFill(mColor);
+
+                ancRoot.getChildren().add(shape);
+                removeShapes.add(shape);
+                me.consume();
+            }
+            if (penStyle == Pen.SQR) {
+
+                xPos = me.getX();
+                yPos = me.getY();
+
+                Shape shape = new Circle(xPos, yPos, 10);
+                shape = new Circle(xPos, yPos, 2);
+                //  shape.setStroke(mColor);
+                shape.setFill(mColor);
+                ancRoot.getChildren().add(shape);
+//                    removeShapes.add(shape);
+                me.consume();
+            }
+            if (penStyle == Pen.DROP) {
+                xPos = me.getX();
+                yPos = me.getY();
+                Color pixelColor;
+                PixelReader pixelReader = ImageControl.getInstance().getImg().getPixelReader();
+                pixelColor = pixelReader.getColor(((int) xPos), ((int) yPos));
+                System.out.println(pixelColor);
+                clrPick.setValue(pixelColor);
+                mColor = clrPick.getValue();
+            }
+        });
+
+    */
+    }
     @FXML
-    void showHelp(ActionEvent event){
-    final Stage stage= new Stage();
-       Group rootGroup= new Group();
-        Scene scene= new Scene(rootGroup,700,500, Color.WHITESMOKE);
+    private void showHelp(ActionEvent event) {
+        final Stage stage = new Stage();
+        Group rootGroup = new Group();
+        Scene scene = new Scene(rootGroup, 700, 500, Color.WHITESMOKE);
         stage.setScene(scene);
-        stage.setTitle("Help blyat pomogi eptA");
+        stage.setTitle("Info");
         stage.centerOnScreen();
         stage.show();
-        Text text= new Text(100,240,"FxEditor IKAES Group");
+        Text text = new Text(100, 240, "FxEditor IKAES Group");
         text.setFill(Color.DODGERBLUE);
         text.setEffect(new Lighting());
-        text.setFont(Font.font(Font.getDefault().getFamily(),50));
+        text.setFont(Font.font(Font.getDefault().getFamily(), 50));
         rootGroup.getChildren().add(text);
         stage.centerOnScreen();
     }
 
     @FXML
-    private void exit(){
+    private void exit() {
         System.exit(0);
     }
 }
